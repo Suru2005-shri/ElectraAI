@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Dashboard — ELECTRA·AI</title>
+<link rel="stylesheet" href="css/global.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700;900&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
+<style>
+.page{padding-top:80px;min-height:100vh;position:relative;z-index:2;}
+.dash-wrap{padding:32px 48px 60px;}
+
+/* DASH GRID */
+.dash-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+.kpi-card{
+  padding:20px;border-radius:14px;
+  border:1px solid var(--border);background:var(--surface);
+  transition:all 0.25s;
+}
+.kpi-card:hover{border-color:rgba(0,245,255,0.35);transform:translateY(-3px);box-shadow:0 8px 30px rgba(0,245,255,0.12);}
+.kpi-icon{font-size:22px;margin-bottom:10px;}
+.kpi-val{font-family:var(--font-head);font-size:24px;font-weight:900;color:var(--neon);}
+.kpi-lbl{font-size:11px;color:var(--muted);margin-top:4px;}
+.kpi-trend{font-size:11px;margin-top:6px;}
+.kpi-up{color:var(--green);}
+.kpi-down{color:#ff6060;}
+
+/* TWO COL */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;}
+.three-col{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:24px;}
+
+/* PANEL */
+.panel-card{
+  padding:22px;border-radius:14px;
+  border:1px solid var(--border);background:var(--surface);
+}
+.pc-title{
+  font-family:var(--font-head);font-size:11px;
+  color:var(--neon);margin-bottom:16px;letter-spacing:1px;
+}
+
+/* TURNOUT CHART */
+.turnout-chart{display:flex;align-items:flex-end;gap:8px;height:160px;margin-top:8px;}
+.tc-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;}
+.tc-bar{
+  width:100%;border-radius:4px 4px 0 0;
+  background:linear-gradient(180deg,var(--neon),rgba(0,245,255,0.3));
+  transition:height 1s ease;position:relative;
+  cursor:pointer;
+}
+.tc-bar:hover::after{
+  content:attr(data-val);position:absolute;top:-22px;left:50%;transform:translateX(-50%);
+  font-family:var(--font-head);font-size:9px;color:var(--neon);white-space:nowrap;
+}
+.tc-lbl{font-size:9px;color:var(--muted);text-align:center;}
+.tc-val{font-size:9px;color:var(--neon);font-family:var(--font-head);}
+
+/* DONUT */
+.donut-wrap{display:flex;align-items:center;gap:24px;}
+.donut-canvas{flex-shrink:0;}
+.donut-legend{display:flex;flex-direction:column;gap:10px;}
+.dl-item{display:flex;align-items:center;gap:8px;font-size:12px;}
+.dl-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.dl-name{color:var(--muted);}
+.dl-val{color:var(--text);font-weight:600;font-family:var(--font-head);font-size:11px;}
+
+/* ML PREDICTIONS */
+.pred-list{display:flex;flex-direction:column;gap:12px;}
+.pred-item{
+  padding:14px;border-radius:10px;
+  border:1px solid rgba(123,47,255,0.25);
+  background:rgba(123,47,255,0.06);
+}
+.pred-label{font-size:12px;color:var(--text);font-weight:600;margin-bottom:6px;}
+.pred-bar-row{display:flex;align-items:center;gap:10px;}
+.pred-track{flex:1;height:6px;background:rgba(255,255,255,0.07);border-radius:3px;overflow:hidden;}
+.pred-fill{height:100%;border-radius:3px;transition:width 1.2s ease;}
+.pred-pct{font-family:var(--font-head);font-size:11px;width:36px;text-align:right;}
+.pred-ci{font-size:10px;color:var(--muted2);margin-top:4px;}
+
+/* PHASE TABLE */
+.phase-table{width:100%;border-collapse:collapse;}
+.phase-table th{
+  font-family:var(--font-head);font-size:9px;letter-spacing:1.5px;
+  color:var(--muted);text-align:left;padding:8px 12px;
+  border-bottom:1px solid var(--border2);
+}
+.phase-table td{
+  padding:10px 12px;font-size:13px;
+  border-bottom:1px solid rgba(255,255,255,0.03);
+}
+.phase-table tr:hover td{background:rgba(0,245,255,0.03);}
+.status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;}
+.s-done{background:var(--green);box-shadow:0 0 6px var(--green);}
+.s-active{background:var(--gold);box-shadow:0 0 6px var(--gold);}
+.s-pending{background:var(--muted);}
+
+/* REGION MAP BARS */
+.region-list{display:flex;flex-direction:column;gap:10px;}
+.region-row{display:flex;align-items:center;gap:10px;}
+.region-name{font-size:12px;color:var(--muted);width:80px;flex-shrink:0;}
+.region-track{flex:1;height:10px;background:rgba(255,255,255,0.06);border-radius:5px;overflow:hidden;cursor:pointer;}
+.region-fill{height:100%;border-radius:5px;transition:width 1.2s ease;}
+.region-pct{font-family:var(--font-head);font-size:11px;width:36px;text-align:right;}
+
+/* LIVE TICKER */
+.ticker-wrap{
+  background:rgba(0,0,0,0.4);border:1px solid var(--border2);
+  border-radius:10px;overflow:hidden;margin-bottom:24px;
+}
+.ticker-label{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 14px;background:rgba(0,245,255,0.1);
+  font-family:var(--font-head);font-size:9px;color:var(--neon);letter-spacing:1.5px;
+  border-right:1px solid var(--border);
+}
+.ticker-inner{display:flex;gap:40px;padding:6px 20px;overflow:hidden;}
+.ticker-item{font-size:12px;color:var(--muted);white-space:nowrap;}
+.ticker-item strong{color:var(--text);}
+
+@media(max-width:1024px){
+  .dash-grid{grid-template-columns:repeat(2,1fr);}
+  .two-col{grid-template-columns:1fr;}
+  .three-col{grid-template-columns:1fr;}
+}
+@media(max-width:768px){
+  .dash-wrap{padding:16px;}
+  .dash-grid{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+<canvas id="bgCanvas"></canvas>
+
+<nav class="nav">
+  <a href="index.html" class="nav-logo">ELECTRA<span>·AI</span></a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="assistant.html">AI Assistant</a>
+    <a href="timeline.html">Timeline</a>
+    <a href="guide.html">Voter Guide</a>
+    <a href="quiz.html">Quiz</a>
+    <a href="dashboard.html" class="active">Dashboard</a>
+  </div>
+  <div class="nav-status"><span class="dot"></span>ML ONLINE</div>
+</nav>
+
+<div class="page">
+<div class="page-header" style="padding:32px 48px 24px;">
+  <div class="page-breadcrumb">ELECTRA·AI → ANALYTICS DASHBOARD</div>
+  <div class="page-title">Election <span class="glow-text">Analytics</span> Dashboard</div>
+  <div class="page-sub">ML-powered predictions and real-time analytics for India's election process.</div>
+</div>
+
+<div class="dash-wrap">
+
+<!-- LIVE TICKER -->
+<div class="ticker-wrap">
+  <div style="display:flex;align-items:center;">
+    <div class="ticker-label"><span class="dot" style="width:6px;height:6px;"></span>LIVE DATA</div>
+    <div class="ticker-inner" id="tickerInner"></div>
+  </div>
+</div>
+
+<!-- KPI CARDS -->
+<div class="dash-grid">
+  <div class="kpi-card">
+    <div class="kpi-icon">🗳️</div>
+    <div class="kpi-val" id="kpi1">--</div>
+    <div class="kpi-lbl">Registered Voters (Cr)</div>
+    <div class="kpi-trend kpi-up" id="ktrend1">↑ +3.2% from 2019</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon">📊</div>
+    <div class="kpi-val" id="kpi2">--</div>
+    <div class="kpi-lbl">Predicted Turnout</div>
+    <div class="kpi-trend kpi-up" id="ktrend2">↑ ML Prediction</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon">🏛️</div>
+    <div class="kpi-val">543</div>
+    <div class="kpi-lbl">Total Constituencies</div>
+    <div class="kpi-trend" style="color:var(--muted);">→ Unchanged since 2008</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon">📍</div>
+    <div class="kpi-val" id="kpi4">--</div>
+    <div class="kpi-lbl">Polling Booths</div>
+    <div class="kpi-trend kpi-up">↑ +18,000 new booths</div>
+  </div>
+</div>
+
+<!-- TURNOUT + DONUT -->
+<div class="two-col">
+  <!-- HISTORICAL TURNOUT -->
+  <div class="panel-card">
+    <div class="pc-title">HISTORICAL VOTER TURNOUT — LOK SABHA</div>
+    <div class="turnout-chart" id="turnoutChart"></div>
+  </div>
+  <!-- SEAT DISTRIBUTION -->
+  <div class="panel-card">
+    <div class="pc-title">SEAT CATEGORY DISTRIBUTION</div>
+    <div class="donut-wrap" style="margin-top:16px;">
+      <canvas id="donutCanvas" class="donut-canvas" width="130" height="130"></canvas>
+      <div class="donut-legend" id="donutLegend"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ML PREDICTIONS + REGION -->
+<div class="three-col">
+  <!-- PHASE TABLE -->
+  <div class="panel-card">
+    <div class="pc-title">ELECTION PHASE SCHEDULE — STATUS</div>
+    <table class="phase-table" id="phaseTable"></table>
+  </div>
+  <!-- ML PREDICTIONS -->
+  <div class="panel-card" style="background:rgba(123,47,255,0.06);border-color:rgba(123,47,255,0.25);">
+    <div class="pc-title" style="color:#bf7aff;">⚡ ML PREDICTIONS</div>
+    <div class="pred-list" id="predList"></div>
+    <div style="font-size:10px;color:var(--muted2);margin-top:14px;line-height:1.6;">
+      Predictions generated by ML model trained on 15 elections (2004–2024). Confidence intervals shown.
+    </div>
+  </div>
+</div>
+
+<!-- REGION TURNOUT -->
+<div class="two-col">
+  <div class="panel-card">
+    <div class="pc-title">ML PREDICTED TURNOUT BY REGION</div>
+    <div class="region-list" id="regionList"></div>
+  </div>
+  <div class="panel-card">
+    <div class="pc-title">KEY ELECTION METRICS</div>
+    <div id="metricsList"></div>
+  </div>
+</div>
+
+</div>
+</div>
+
+<script src="js/ml-engine.js"></script>
+<script src="js/bg3d.js"></script>
+<script>
+// ─── KPIs ─────────────────────────────────────────────────────
+function animNum(id, target, suffix='', duration=1200){
+  let start=0;
+  const step = target/60;
+  const iv=setInterval(()=>{
+    start=Math.min(target,start+step);
+    document.getElementById(id).textContent = (Number.isInteger(target)?Math.round(start):start.toFixed(1))+suffix;
+    if(start>=target)clearInterval(iv);
+  },duration/60);
+}
+
+setTimeout(()=>{
+  animNum('kpi1',96.8,' Cr');
+  animNum('kpi2',68,'%');
+  animNum('kpi4',10.5,' L');
+},400);
+
+// ─── TICKER ───────────────────────────────────────────────────
+const TICKS = [
+  '🗳️ <strong>Voter Registration:</strong> 96.8 crore registered voters',
+  '📊 <strong>ML Prediction:</strong> 68% national turnout forecast',
+  '🏛️ <strong>ECI Status:</strong> Model Code of Conduct active',
+  '📱 <strong>cVIGIL:</strong> 2,847 violations reported this cycle',
+  '🔒 <strong>EVM Security:</strong> All units sealed and verified',
+  '📅 <strong>Next Phase:</strong> Nomination filing opens in 12 days',
+  '⚡ <strong>ML Update:</strong> South India predicted 72% turnout',
+];
+document.getElementById('tickerInner').innerHTML = [...TICKS,...TICKS].map(t=>`<div class="ticker-item">${t}</div>`).join('');
+
+// ─── TURNOUT CHART ────────────────────────────────────────────
+const TURNOUT_DATA=[
+  {year:'2004',pct:58},{year:'2009',pct:58},{year:'2014',pct:66},
+  {year:'2019',pct:67},{year:'2024*',pct:65},{year:'2029†',pct:68}
+];
+const maxT=70;
+document.getElementById('turnoutChart').innerHTML = TURNOUT_DATA.map((d,i)=>`
+  <div class="tc-bar-wrap">
+    <div class="tc-val">${d.pct}%</div>
+    <div class="tc-bar" data-val="${d.pct}%" style="height:0%;background:${i===5?'linear-gradient(180deg,#7b2fff,rgba(123,47,255,0.3))':i===4?'linear-gradient(180deg,var(--gold),rgba(255,215,0,0.3))':'linear-gradient(180deg,var(--neon),rgba(0,245,255,0.3))'};"
+     title="${d.year}: ${d.pct}%"></div>
+    <div class="tc-lbl">${d.year}</div>
+  </div>
+`).join('');
+setTimeout(()=>{
+  document.querySelectorAll('.tc-bar').forEach((bar,i)=>{
+    const pct = TURNOUT_DATA[i].pct;
+    bar.style.height = ((pct/maxT)*100)+'%';
+  });
+},300);
+
+// ─── DONUT ────────────────────────────────────────────────────
+const SEATS=[
+  {label:'General',val:412,color:'#00f5ff'},{label:'SC Reserved',val:84,color:'#7b2fff'},
+  {label:'ST Reserved',val:47,color:'#ffd700'}
+];
+function drawDonut(){
+  const c=document.getElementById('donutCanvas');
+  const ctx=c.getContext('2d');
+  const cx=65,cy=65,r=50,inner=30;
+  const total=543; let angle=-Math.PI/2;
+  SEATS.forEach(s=>{
+    const sweep=(s.val/total)*Math.PI*2;
+    ctx.beginPath();ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,r,angle,angle+sweep);
+    ctx.closePath();ctx.fillStyle=s.color;ctx.fill();
+    ctx.beginPath();ctx.arc(cx,cy,inner,0,Math.PI*2);
+    ctx.fillStyle='#03060f';ctx.fill();
+    angle+=sweep;
+  });
+  ctx.fillStyle='#00f5ff';ctx.font='bold 14px Orbitron,sans-serif';
+  ctx.textAlign='center';ctx.fillText('543',cx,cy+2);
+  ctx.font='8px Exo 2,sans-serif';ctx.fillStyle='rgba(232,244,255,0.5)';
+  ctx.fillText('SEATS',cx,cy+14);
+}
+drawDonut();
+document.getElementById('donutLegend').innerHTML = SEATS.map(s=>`
+  <div class="dl-item">
+    <div class="dl-dot" style="background:${s.color}"></div>
+    <div class="dl-name">${s.label}</div>
+    <div class="dl-val">${s.val}</div>
+  </div>
+`).join('');
+
+// ─── PHASE TABLE ──────────────────────────────────────────────
+const PHASES=[
+  {ph:'Phase 1',states:'Tamil Nadu, Rajasthan (part)',seats:102,date:'Day 60',status:'done'},
+  {ph:'Phase 2',states:'Kerala, Karnataka (part)',seats:89,date:'Day 67',status:'done'},
+  {ph:'Phase 3',states:'Gujarat, Maharashtra (part)',seats:94,date:'Day 70',status:'active'},
+  {ph:'Phase 4',states:'Madhya Pradesh, Odisha',seats:96,date:'Day 74',status:'pending'},
+  {ph:'Phase 5',states:'Uttar Pradesh (part)',seats:49,date:'Day 77',status:'pending'},
+  {ph:'Phase 6',states:'Jharkhand, West Bengal (part)',seats:58,date:'Day 79',status:'pending'},
+  {ph:'Phase 7',states:'Bihar, Punjab, rest',seats:57,date:'Day 82',status:'pending'},
+];
+document.getElementById('phaseTable').innerHTML=`
+  <tr><th>Phase</th><th>Key States</th><th>Seats</th><th>Date</th><th>Status</th></tr>
+  ${PHASES.map(p=>`<tr>
+    <td style="font-family:var(--font-head);font-size:11px;color:var(--neon);">${p.ph}</td>
+    <td style="color:var(--muted);font-size:12px;">${p.states}</td>
+    <td style="font-family:var(--font-head);font-size:12px;">${p.seats}</td>
+    <td style="color:var(--gold);font-size:11px;font-family:var(--font-head);">${p.date}</td>
+    <td><span class="status-dot s-${p.status}"></span><span style="font-size:11px;color:var(--muted);">${p.status.toUpperCase()}</span></td>
+  </tr>`).join('')}
+`;
+
+// ─── ML PREDICTIONS ───────────────────────────────────────────
+const PREDS=[
+  {label:'National Voter Turnout',pct:68,ci:'± 3.2%',color:'linear-gradient(90deg,#00f5ff,#7b2fff)'},
+  {label:'First-Time Voter Participation',pct:74,ci:'± 4.1%',color:'linear-gradient(90deg,#ffd700,#ff9500)'},
+  {label:'Women Voter Turnout',pct:71,ci:'± 2.8%',color:'linear-gradient(90deg,#00ff88,#00c853)'},
+  {label:'Urban Constituency Turnout',pct:61,ci:'± 3.5%',color:'linear-gradient(90deg,#bf7aff,#7b2fff)'},
+  {label:'Rural Constituency Turnout',pct:72,ci:'± 2.1%',color:'linear-gradient(90deg,#00f5ff,#00ff88)'},
+];
+document.getElementById('predList').innerHTML = PREDS.map(p=>`
+  <div class="pred-item">
+    <div class="pred-label">${p.label}</div>
+    <div class="pred-bar-row">
+      <div class="pred-track"><div class="pred-fill" data-pct="${p.pct}" style="width:0%;background:${p.color};"></div></div>
+      <div class="pred-pct" style="color:#bf7aff;">${p.pct}%</div>
+    </div>
+    <div class="pred-ci">95% Confidence Interval: ${p.ci}</div>
+  </div>
+`).join('');
+setTimeout(()=>{
+  document.querySelectorAll('.pred-fill').forEach(el=>{
+    el.style.width = el.dataset.pct+'%';
+  });
+},500);
+
+// ─── REGION BARS ──────────────────────────────────────────────
+const REGIONS=[
+  {name:'North India',pct:64,color:'#00f5ff'},{name:'South India',pct:72,color:'#7b2fff'},
+  {name:'East India',pct:67,color:'#ffd700'},{name:'West India',pct:63,color:'#00ff88'},
+  {name:'NE India',pct:79,color:'#bf7aff'},{name:'Central',pct:61,color:'#ff9500'},
+];
+document.getElementById('regionList').innerHTML = REGIONS.map(r=>`
+  <div class="region-row">
+    <div class="region-name">${r.name}</div>
+    <div class="region-track"><div class="region-fill" data-pct="${r.pct}" style="width:0%;background:linear-gradient(90deg,${r.color},${r.color}88);"></div></div>
+    <div class="region-pct" style="color:${r.color};">${r.pct}%</div>
+  </div>
+`).join('');
+setTimeout(()=>{
+  document.querySelectorAll('.region-fill').forEach(el=>{ el.style.width=el.dataset.pct+'%'; });
+},600);
+
+// ─── METRICS ──────────────────────────────────────────────────
+const METRICS=[
+  {icon:'📋',label:'Contesting Candidates',val:'8,360+',note:'Avg 15 per constituency'},
+  {icon:'👮',label:'Security Personnel',val:'~15 Lakh',note:'CAPF + State Police combined'},
+  {icon:'💰',label:'Total Election Cost',val:'~₹1.2 Lakh Cr',note:'Most expensive election globally'},
+  {icon:'📡',label:'Webcasting Booths',val:'4.1 Lakh',note:'Live monitoring by ECI'},
+  {icon:'🚁',label:'Expenditure Observers',val:'900+',note:'Deployed across all phases'},
+  {icon:'📱',label:'cVIGIL Complaints',val:'2,847',note:'Action taken in 100 min avg'},
+];
+document.getElementById('metricsList').innerHTML=`<div style="display:flex;flex-direction:column;gap:10px;">
+  ${METRICS.map(m=>`<div style="display:flex;gap:12px;align-items:flex-start;padding:10px;border-radius:8px;border:1px solid var(--border2);background:rgba(255,255,255,0.02);">
+    <span style="font-size:18px;flex-shrink:0;">${m.icon}</span>
+    <div>
+      <div style="font-size:12px;color:var(--muted);">${m.label}</div>
+      <div style="font-family:var(--font-head);font-size:14px;color:var(--neon);margin-top:2px;">${m.val}</div>
+      <div style="font-size:10px;color:var(--muted2);margin-top:1px;">${m.note}</div>
+    </div>
+  </div>`).join('')}
+</div>`;
+</script>
+</body>
+</html>
