@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>AI Assistant — ELECTRA·AI</title>
+<link rel="stylesheet" href="css/global.css"/>
+<link rel="stylesheet" href="css/assistant.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700;900&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
+</head>
+<body>
+<canvas id="bgCanvas"></canvas>
+
+<nav class="nav">
+  <a href="index.html" class="nav-logo">ELECTRA<span>·AI</span></a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="assistant.html" class="active">AI Assistant</a>
+    <a href="timeline.html">Timeline</a>
+    <a href="guide.html">Voter Guide</a>
+    <a href="quiz.html">Quiz</a>
+    <a href="dashboard.html">Dashboard</a>
+  </div>
+  <div class="nav-status"><span class="dot"></span>ML ONLINE</div>
+</nav>
+
+<div class="assistant-shell">
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-section">
+      <div class="sb-label">ELECTION STAGES</div>
+      <div id="stageList"></div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-label">ML INSIGHTS</div>
+      <div class="ml-panel">
+        <div class="ml-row">
+          <div class="ml-name">Voter Turnout</div>
+          <div class="ml-track"><div class="ml-fill neon" id="mBar1" style="width:0%"></div></div>
+          <div class="ml-val" id="mVal1">–</div>
+        </div>
+        <div class="ml-row">
+          <div class="ml-name">Awareness</div>
+          <div class="ml-track"><div class="ml-fill gold" id="mBar2" style="width:0%"></div></div>
+          <div class="ml-val" id="mVal2">–</div>
+        </div>
+        <div class="ml-row">
+          <div class="ml-name">Integrity</div>
+          <div class="ml-track"><div class="ml-fill green" id="mBar3" style="width:0%"></div></div>
+          <div class="ml-val" id="mVal3">–</div>
+        </div>
+        <div class="ml-row">
+          <div class="ml-name">Participation</div>
+          <div class="ml-track"><div class="ml-fill purple" id="mBar4" style="width:0%"></div></div>
+          <div class="ml-val" id="mVal4">–</div>
+        </div>
+        <div class="ml-note">Predictions by ML model trained on 15+ years of ECI data</div>
+      </div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-label">QUICK FACTS</div>
+      <div class="facts-list">
+        <div class="fact-item"><span class="fact-icon">🗳️</span><span>Universal Adult Suffrage since 1950</span></div>
+        <div class="fact-item"><span class="fact-icon">📅</span><span>Lok Sabha elected every 5 years</span></div>
+        <div class="fact-item"><span class="fact-icon">🏛️</span><span>543 Lok Sabha constituencies</span></div>
+        <div class="fact-item"><span class="fact-icon">✅</span><span>Eligible from age 18</span></div>
+        <div class="fact-item"><span class="fact-icon">📋</span><span>EPIC card or 12 alternate IDs</span></div>
+        <div class="fact-item"><span class="fact-icon">☎️</span><span>Helpline: 1950 (ECI)</span></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CHAT -->
+  <main class="chat-main">
+
+    <!-- TOP TABS -->
+    <div class="chat-tabs">
+      <button class="ctab active" onclick="setTab('chat',this)">💬 AI CHAT</button>
+      <button class="ctab" onclick="setTab('topics',this)">📚 TOPICS</button>
+      <button class="ctab" onclick="setTab('history',this)">🕐 HISTORY</button>
+    </div>
+
+    <!-- CHAT PANEL -->
+    <div id="panelChat" class="panel active">
+      <div class="chat-area" id="chatArea"></div>
+      <div class="input-zone">
+        <div class="quick-pills" id="quickPills"></div>
+        <div class="input-row">
+          <input id="chatInput" class="chat-input"
+            placeholder="Ask anything about India's election process..."
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"/>
+          <button class="send-btn" onclick="sendMessage()" title="Send">➤</button>
+          <button class="clear-btn" onclick="clearChat()" title="Clear">✕</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOPICS PANEL -->
+    <div id="panelTopics" class="panel" style="display:none;">
+      <div class="topics-grid" id="topicsGrid"></div>
+    </div>
+
+    <!-- HISTORY PANEL -->
+    <div id="panelHistory" class="panel" style="display:none;">
+      <div id="historyList" class="history-list"></div>
+    </div>
+
+  </main>
+</div>
+
+<script src="js/ml-engine.js"></script>
+<script src="js/bg3d.js"></script>
+<script>
+// ─── State ───────────────────────────────────────────────────
+const STAGES = [
+  {n:'01',name:'Announcement',date:'T-90 days',done:true},
+  {n:'02',name:'MCC in Force',date:'T-89 days',done:true},
+  {n:'03',name:'Voter Lists',date:'T-60 days',done:true},
+  {n:'04',name:'Nominations',date:'T-45 days',done:false},
+  {n:'05',name:'Scrutiny',date:'T-38 days',done:false},
+  {n:'06',name:'Campaign',date:'T-35 days',done:false},
+  {n:'07',name:'Silence Period',date:'T-2 days',done:false},
+  {n:'08',name:'Voting Day',date:'Election Day',done:false},
+  {n:'09',name:'Counting',date:'Result Day',done:false},
+  {n:'10',name:'New Govt.',date:'T+30 days',done:false},
+];
+
+const STAGE_INFO = [
+  "The <strong>President dissolves the Lok Sabha</strong> and the ECI issues an official Gazette notification announcing election schedules, phases and key dates.",
+  "The <strong>Model Code of Conduct</strong> comes into immediate force. All political parties and government machinery must adhere to election rules from this moment.",
+  "The <strong>final Electoral Roll</strong> is published. Citizens can check their enrollment at voters.eci.gov.in. Last chance to register is 60 days before polling.",
+  "Any eligible Indian citizen above <strong>25 years</strong> can file nomination. Must submit Form 2B, security deposit (₹25,000), and affidavits declaring assets, liabilities, education, and criminal history.",
+  "Returning Officers <strong>scrutinize all nomination papers</strong> for completeness and validity. Invalid nominations are rejected with written reasons given to candidates.",
+  "The most intense phase — parties and candidates campaign via <strong>rallies, door-to-door visits, media ads and digital campaigns</strong>. Flying squads monitor MCC compliance.",
+  "A mandatory <strong>48-hour silence period</strong> begins before polling. No campaigning, advertising or canvassing is permitted. Media must not publish exit polls.",
+  "Polling stations open from <strong>7 AM to 6 PM</strong>. Voters queue, verify identity, press EVM button, verify VVPAT. Approximately 1M+ booths across India.",
+  "EVMs are transported to counting centers. <strong>Postal ballots counted first</strong>, then EVM round by round. Results declared constituency-wise as counting completes.",
+  "The winning party/coalition leader is invited by the <strong>President</strong> to form government. PM and Cabinet are sworn in. New government must prove floor majority within 30 days."
+];
+
+const QUICK_QUESTIONS = [
+  "How to register to vote?",
+  "How does EVM work?",
+  "What is VVPAT?",
+  "Model Code of Conduct",
+  "How are results counted?",
+  "Can NRIs vote?",
+  "Election phases explained",
+  "Role of ECI",
+  "Campaign spending limits",
+  "What ID is needed to vote?",
+];
+
+let chatHistory = [];
+let activeStage = 3;
+let msgCount = 0;
+
+// ─── Init ─────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded',()=>{
+  renderStages();
+  renderQuickPills(QUICK_QUESTIONS.slice(0,5));
+  renderTopics();
+  animateMLBars();
+  addMessage('ai', `Welcome to <strong>ELECTRA·AI</strong> — your ML-powered election intelligence system! 🗳️<br><br>
+I can guide you through <strong>every aspect</strong> of India's democratic election process — from voter registration to government formation.<br><br>
+I've analyzed <span class="tag">15+ years</span> of ECI data and election records to give you accurate, detailed answers. What would you like to know?`);
+});
+
+// ─── Stages ───────────────────────────────────────────────────
+function renderStages(){
+  document.getElementById('stageList').innerHTML = STAGES.map((s,i)=>`
+    <div class="stage-item ${i===activeStage?'active':''}" onclick="clickStage(${i})">
+      <div class="stage-n">${s.n}</div>
+      <div class="stage-body">
+        <div class="stage-name ${s.done?'done':''}">${s.name}</div>
+        <div class="stage-date">${s.date}</div>
+      </div>
+      ${s.done?'<div class="stage-check">✓</div>':''}
+    </div>
+  `).join('');
+}
+
+function clickStage(i){
+  activeStage = i;
+  renderStages();
+  setTab('chat', document.querySelector('.ctab'));
+  document.querySelectorAll('.ctab')[0].classList.add('active');
+  document.querySelectorAll('.ctab').forEach((t,j)=>t.classList.toggle('active',j===0));
+  document.querySelectorAll('.panel').forEach(p=>p.style.display='none');
+  document.getElementById('panelChat').style.display='flex';
+  const s = STAGES[i];
+  addMessage('user',`Tell me about the <strong>${s.name}</strong> stage`);
+  setTimeout(()=> addMessage('ai', STAGE_INFO[i]), 700);
+}
+
+// ─── Chat ─────────────────────────────────────────────────────
+function addMessage(role, html){
+  const area = document.getElementById('chatArea');
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  const ts = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  div.innerHTML = `
+    <div class="avatar ${role}">${role==='ai'?'AI':'U'}</div>
+    <div class="bubble-wrap">
+      <div class="bubble ${role}">${html}</div>
+      <div class="msg-ts">${ts}</div>
+    </div>`;
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+
+  if(role==='user'){
+    chatHistory.push({role,text:div.querySelector('.bubble').textContent, time:ts});
+    updateHistory();
+  }
+  msgCount++;
+}
+
+function showTyping(){
+  const area = document.getElementById('chatArea');
+  const div = document.createElement('div');
+  div.id='typing'; div.className='msg ai';
+  div.innerHTML=`<div class="avatar ai">AI</div><div class="bubble ai typing"><span></span><span></span><span></span></div>`;
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+}
+function hideTyping(){ const t=document.getElementById('typing'); if(t)t.remove(); }
+
+function sendMessage(txt){
+  const input = document.getElementById('chatInput');
+  const q = txt || input.value.trim();
+  if(!q) return;
+  input.value='';
+  // Switch to chat panel
+  document.querySelectorAll('.panel').forEach(p=>p.style.display='none');
+  document.getElementById('panelChat').style.display='flex';
+  document.querySelectorAll('.ctab').forEach((t,i)=>t.classList.toggle('active',i===0));
+
+  addMessage('user', q);
+  showTyping();
+
+  const delay = 600 + Math.random()*600;
+  setTimeout(()=>{
+    hideTyping();
+    const result = ElectraML.KB.getAnswer(q);
+    addMessage('ai', result.answer);
+    if(result.related && result.related.length){
+      const related = result.related
+        .map(r => ElectraML.KB.intents.find(i=>i.id===r))
+        .filter(Boolean)
+        .slice(0,4)
+        .map(i=>`<button class="pill" onclick="sendMessage('${i.title}')">${i.title}</button>`)
+        .join('');
+      renderQuickPills(null, related);
+    }
+  }, delay);
+}
+
+function renderQuickPills(arr, html){
+  const el = document.getElementById('quickPills');
+  if(html){ el.innerHTML = html; return; }
+  el.innerHTML = (arr||QUICK_QUESTIONS.slice(0,5))
+    .map(q=>`<button class="pill" onclick="sendMessage('${q}')">${q}</button>`)
+    .join('');
+}
+
+function clearChat(){
+  document.getElementById('chatArea').innerHTML='';
+  chatHistory=[];
+  updateHistory();
+  addMessage('ai','Chat cleared. Ask me anything about India\'s election process! 🗳️');
+  renderQuickPills(QUICK_QUESTIONS.slice(0,5));
+}
+
+// ─── Tabs ─────────────────────────────────────────────────────
+function setTab(tab, btn){
+  document.querySelectorAll('.ctab').forEach(t=>t.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  document.querySelectorAll('.panel').forEach(p=>p.style.display='none');
+  if(tab==='chat'){ document.getElementById('panelChat').style.display='flex'; }
+  else if(tab==='topics'){ document.getElementById('panelTopics').style.display='block'; }
+  else if(tab==='history'){ document.getElementById('panelHistory').style.display='block'; updateHistory(); }
+}
+
+// ─── Topics ───────────────────────────────────────────────────
+function renderTopics(){
+  const topics = [
+    {icon:'🪪',title:'Voter Registration',q:'How to register to vote?'},
+    {icon:'🗳️',title:'Voting Process',q:'How do I vote on election day?'},
+    {icon:'💻',title:'EVM Explained',q:'How does EVM work?'},
+    {icon:'📋',title:'VVPAT System',q:'What is VVPAT?'},
+    {icon:'📜',title:'Model Code of Conduct',q:'Model Code of Conduct'},
+    {icon:'💰',title:'Campaign Spending',q:'Campaign spending limits'},
+    {icon:'📊',title:'Vote Counting',q:'How are results counted?'},
+    {icon:'🌍',title:'NRI Voting',q:'Can NRIs vote?'},
+    {icon:'📅',title:'Election Phases',q:'Election phases explained'},
+    {icon:'🏛️',title:'Role of ECI',q:'Role of ECI'},
+    {icon:'⚖️',title:'FPTP System',q:'How does FPTP work in India?'},
+    {icon:'📍',title:'Find Your Booth',q:'How to find my polling booth?'},
+  ];
+  document.getElementById('topicsGrid').innerHTML = topics.map(t=>`
+    <div class="topic-card" onclick="topicClick('${t.q}')">
+      <div class="topic-icon">${t.icon}</div>
+      <div class="topic-title">${t.title}</div>
+    </div>
+  `).join('');
+}
+
+function topicClick(q){
+  setTab('chat', document.querySelectorAll('.ctab')[0]);
+  sendMessage(q);
+}
+
+// ─── History ──────────────────────────────────────────────────
+function updateHistory(){
+  const el = document.getElementById('historyList');
+  if(!chatHistory.length){
+    el.innerHTML='<div style="text-align:center;color:var(--muted);padding:40px 20px;font-size:13px;">No conversation history yet.<br>Start chatting to see your questions here.</div>';
+    return;
+  }
+  el.innerHTML = chatHistory.slice().reverse().map(m=>`
+    <div class="history-item" onclick="sendMessage('${m.text.replace(/'/g,'')}')">
+      <div class="hi-text">${m.text}</div>
+      <div class="hi-time">${m.time}</div>
+    </div>
+  `).join('');
+}
+
+// ─── ML Bars ──────────────────────────────────────────────────
+function animateMLBars(){
+  const bars = [
+    {bar:'mBar1',val:'mVal1',target:72,suffix:'%'},
+    {bar:'mBar2',val:'mVal2',target:58,suffix:'%'},
+    {bar:'mBar3',val:'mVal3',target:89,suffix:'%'},
+    {bar:'mBar4',val:'mVal4',target:64,suffix:'%'},
+  ];
+  bars.forEach((b,i)=>{
+    setTimeout(()=>{
+      document.getElementById(b.bar).style.width = b.target+'%';
+      let n=0;
+      const iv = setInterval(()=>{
+        n = Math.min(b.target, n+2);
+        document.getElementById(b.val).textContent = n+b.suffix;
+        if(n>=b.target) clearInterval(iv);
+      },20);
+    }, 400+i*250);
+  });
+}
+</script>
+</body>
+</html>
