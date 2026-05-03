@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Election Timeline — ELECTRA·AI</title>
+<link rel="stylesheet" href="css/global.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700;900&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
+<style>
+.page{padding-top:80px;min-height:100vh;position:relative;z-index:2;}
+
+.tl-header{
+  padding:40px 60px 30px;
+  display:flex;align-items:flex-end;justify-content:space-between;
+  border-bottom:1px solid var(--border2);
+  flex-wrap:wrap;gap:20px;
+}
+.tl-title{font-family:var(--font-head);font-size:32px;font-weight:900;}
+.tl-sub{font-size:14px;color:var(--muted);margin-top:6px;}
+
+.progress-bar{
+  display:flex;align-items:center;gap:12px;
+}
+.prog-label{font-family:var(--font-head);font-size:10px;color:var(--muted);letter-spacing:1.5px;}
+.prog-track{width:200px;height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden;}
+.prog-fill{width:38%;height:100%;background:linear-gradient(90deg,var(--neon),var(--neon2));border-radius:4px;}
+.prog-pct{font-family:var(--font-head);font-size:12px;color:var(--neon);}
+
+/* PHASES NAV */
+.phases-nav{
+  display:flex;gap:0;padding:0 60px;
+  border-bottom:1px solid var(--border2);
+  background:rgba(3,6,15,0.7);
+  overflow-x:auto;
+}
+.phase-tab{
+  padding:14px 22px;font-family:var(--font-head);
+  font-size:10px;letter-spacing:1.2px;color:var(--muted);
+  border-bottom:2px solid transparent;cursor:pointer;
+  transition:all 0.2s;white-space:nowrap;background:transparent;border-top:none;border-left:none;border-right:none;
+}
+.phase-tab.active{color:var(--neon);border-bottom-color:var(--neon);}
+.phase-tab:hover:not(.active){color:var(--text);}
+
+/* 3D TIMELINE */
+.timeline-3d{
+  padding:40px 60px;
+  perspective:1200px;
+}
+
+.tl-track{
+  position:relative;
+  transform-style:preserve-3d;
+}
+
+.tl-track::before{
+  content:'';
+  position:absolute;left:120px;top:0;bottom:0;width:2px;
+  background:linear-gradient(180deg,transparent,var(--neon) 10%,var(--neon) 90%,transparent);
+  box-shadow:0 0 12px var(--neon);
+}
+
+.tl-item{
+  display:flex;gap:0;align-items:flex-start;
+  margin-bottom:28px;position:relative;
+  animation:slideIn 0.5s ease both;
+}
+
+.tl-item:nth-child(1){animation-delay:0.05s;}
+.tl-item:nth-child(2){animation-delay:0.10s;}
+.tl-item:nth-child(3){animation-delay:0.15s;}
+.tl-item:nth-child(4){animation-delay:0.20s;}
+.tl-item:nth-child(5){animation-delay:0.25s;}
+.tl-item:nth-child(6){animation-delay:0.30s;}
+.tl-item:nth-child(7){animation-delay:0.35s;}
+.tl-item:nth-child(8){animation-delay:0.40s;}
+.tl-item:nth-child(9){animation-delay:0.45s;}
+.tl-item:nth-child(10){animation-delay:0.50s;}
+
+@keyframes slideIn{
+  from{opacity:0;transform:translateX(-30px);}
+  to{opacity:1;transform:none;}
+}
+
+.tl-date-col{
+  width:120px;padding-right:30px;text-align:right;
+  flex-shrink:0;padding-top:14px;
+}
+.tl-day{
+  font-family:var(--font-head);font-size:11px;
+  color:var(--gold);font-weight:700;
+}
+.tl-phase-tag{
+  font-size:9px;color:var(--muted);margin-top:3px;letter-spacing:0.5px;
+}
+
+.tl-dot-col{
+  width:20px;flex-shrink:0;position:relative;
+  display:flex;justify-content:center;
+}
+.tl-dot{
+  width:14px;height:14px;border-radius:50%;
+  background:var(--neon);box-shadow:0 0 16px var(--neon);
+  margin-top:16px;flex-shrink:0;
+  border:2px solid var(--bg);
+  transition:all 0.3s;
+  cursor:pointer;
+}
+.tl-dot.done{background:var(--green);box-shadow:0 0 12px var(--green);}
+.tl-dot.highlight{background:var(--gold);box-shadow:0 0 24px var(--gold);width:18px;height:18px;margin-top:14px;}
+.tl-dot:hover{transform:scale(1.5);}
+
+.tl-content{
+  flex:1;padding-left:30px;
+}
+
+.tl-card{
+  padding:16px 20px;border-radius:12px;
+  border:1px solid var(--border);background:var(--surface);
+  cursor:pointer;transition:all 0.25s;
+}
+.tl-card:hover,.tl-card.expanded{
+  border-color:rgba(0,245,255,0.35);background:var(--surface2);
+  transform:translateX(6px);
+  box-shadow:0 6px 30px rgba(0,245,255,0.12);
+}
+.tl-card.highlight-card{
+  border-color:rgba(255,215,0,0.5);
+  background:rgba(255,215,0,0.06);
+}
+.tl-card.done-card{border-color:rgba(0,255,136,0.2);}
+
+.tc-header{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.tc-title{
+  font-family:var(--font-head);font-size:13px;font-weight:700;
+  color:var(--text);
+}
+.tc-title.highlight{color:var(--gold);font-size:15px;}
+.tc-title.done{color:var(--green);}
+
+.tc-badges{display:flex;gap:6px;flex-wrap:wrap;}
+.tc-body{
+  font-size:13px;color:var(--muted);line-height:1.65;
+  margin-top:10px;display:none;
+}
+.tl-card.expanded .tc-body{display:block;}
+.tc-arrow{font-size:14px;color:var(--muted);transition:transform 0.2s;}
+.tl-card.expanded .tc-arrow{transform:rotate(90deg);}
+
+/* STATS BAR */
+.stats-bar{
+  display:flex;gap:16px;padding:20px 60px;
+  border-top:1px solid var(--border2);border-bottom:1px solid var(--border2);
+  background:rgba(3,6,15,0.5);flex-wrap:wrap;
+}
+.sbar-item{text-align:center;flex:1;min-width:120px;}
+.sbar-num{font-family:var(--font-head);font-size:22px;font-weight:900;color:var(--neon);}
+.sbar-lbl{font-size:11px;color:var(--muted);margin-top:3px;}
+</style>
+</head>
+<body>
+<canvas id="bgCanvas"></canvas>
+
+<nav class="nav">
+  <a href="index.html" class="nav-logo">ELECTRA<span>·AI</span></a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="assistant.html">AI Assistant</a>
+    <a href="timeline.html" class="active">Timeline</a>
+    <a href="guide.html">Voter Guide</a>
+    <a href="quiz.html">Quiz</a>
+    <a href="dashboard.html">Dashboard</a>
+  </div>
+  <div class="nav-status"><span class="dot"></span>ML ONLINE</div>
+</nav>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="tl-header">
+    <div>
+      <div class="section-label">INTERACTIVE ELECTION TIMELINE</div>
+      <div class="tl-title">India Lok Sabha — <span class="glow-text">90-Day Journey</span></div>
+      <div class="tl-sub">Click any event to expand details. Timeline shows the complete process from dissolution to government formation.</div>
+    </div>
+    <div class="progress-bar">
+      <div class="prog-label">PROCESS</div>
+      <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+      <div class="prog-pct" id="progPct">38%</div>
+    </div>
+  </div>
+
+  <!-- STATS BAR -->
+  <div class="stats-bar">
+    <div class="sbar-item"><div class="sbar-num">90</div><div class="sbar-lbl">Total Days</div></div>
+    <div class="sbar-item"><div class="sbar-num">7</div><div class="sbar-lbl">Voting Phases</div></div>
+    <div class="sbar-item"><div class="sbar-num">543</div><div class="sbar-lbl">Constituencies</div></div>
+    <div class="sbar-item"><div class="sbar-num">1M+</div><div class="sbar-lbl">Polling Booths</div></div>
+    <div class="sbar-item"><div class="sbar-num">10M+</div><div class="sbar-lbl">Polling Staff</div></div>
+    <div class="sbar-item"><div class="sbar-num">900M+</div><div class="sbar-lbl">Eligible Voters</div></div>
+  </div>
+
+  <!-- PHASES NAV -->
+  <div class="phases-nav">
+    <button class="phase-tab active" onclick="filterPhase('all',this)">ALL PHASES</button>
+    <button class="phase-tab" onclick="filterPhase('pre',this)">PRE-ELECTION</button>
+    <button class="phase-tab" onclick="filterPhase('campaign',this)">CAMPAIGN</button>
+    <button class="phase-tab" onclick="filterPhase('voting',this)">VOTING</button>
+    <button class="phase-tab" onclick="filterPhase('post',this)">POST-ELECTION</button>
+  </div>
+
+  <!-- TIMELINE -->
+  <div class="timeline-3d">
+    <div class="tl-track" id="tlTrack"></div>
+  </div>
+
+</div>
+
+<script src="js/bg3d.js"></script>
+<script>
+const EVENTS = [
+  {
+    day:'Day 1',phase:'pre',done:true,
+    title:'Election Announcement & Dissolution',
+    tags:['PRE-ELECTION','CONSTITUTIONAL'],
+    highlight:false,
+    detail:`The President of India issues a proclamation dissolving the existing Lok Sabha on the advice of the Council of Ministers. The Election Commission of India (ECI) simultaneously releases the official election schedule — listing phase dates, nomination deadlines, and the counting date — in the Gazette of India. This is the official starting gun for the entire election process.`
+  },
+  {
+    day:'Day 1',phase:'pre',done:true,
+    title:'Model Code of Conduct Begins',
+    tags:['MCC','ENFORCEMENT'],
+    highlight:false,
+    detail:`Immediately upon election announcement, the Model Code of Conduct (MCC) comes into force. This means: no new government schemes can be announced, no public resources (vehicles, officials, buildings) can be used for campaigning, all political advertisements must be pre-certified, and government transfers of officials are frozen. Flying Squads begin monitoring across the country.`
+  },
+  {
+    day:'Day 30',phase:'pre',done:true,
+    title:'Final Electoral Roll Published',
+    tags:['VOTERS','REGISTRATION'],
+    highlight:false,
+    detail:`The Election Commission publishes the final electoral roll — the official list of all registered voters. Citizens can check their enrollment at voters.eci.gov.in. Booth Level Officers (BLOs) conduct house-to-house verification. Any citizen who missed registration must wait for the supplementary roll or a future election. Approximately 950 million names appear on India's final electoral roll.`
+  },
+  {
+    day:'Day 45',phase:'pre',done:false,
+    title:'Nomination Filing Opens',
+    tags:['CANDIDATES','FILING'],
+    highlight:false,
+    detail:`Any Indian citizen above 25 years of age who meets eligibility criteria can contest Lok Sabha elections. Candidates must file Form 2B with the Returning Officer of their chosen constituency, deposit ₹25,000 as a security deposit (refunded if they receive more than 1/6th of valid votes), and submit statutory affidavits declaring criminal records, assets, liabilities, and education qualifications. These affidavits are publicly available on myneta.info.`
+  },
+  {
+    day:'Day 52',phase:'pre',done:false,
+    title:'Scrutiny of Nominations',
+    tags:['CANDIDATES','LEGAL'],
+    highlight:false,
+    detail:`The Returning Officer examines all filed nominations for compliance with legal requirements. Candidates with disqualifying criminal convictions, incorrect affidavits, or incomplete documentation may be rejected. Rejected candidates can appeal to the High Court. Valid nominations are listed officially. Candidates can also inspect each other's nomination papers — exposing false affidavits can lead to legal challenges even after election.`
+  },
+  {
+    day:'Day 55',phase:'campaign',done:false,
+    title:'Last Date for Withdrawal',
+    tags:['CANDIDATES','DEADLINE'],
+    highlight:false,
+    detail:`After this date, the list of contesting candidates is finalized and cannot change (except in case of death of a candidate, where polling may be postponed). The final list determines what appears on the EVM ballot unit. Political parties and candidates now focus entirely on campaigning. The number of candidates per constituency in India can range from 2 to 100+.`
+  },
+  {
+    day:'Day 55–75',phase:'campaign',done:false,
+    title:'Active Campaign Period',
+    tags:['CAMPAIGN','MCC'],
+    highlight:false,
+    detail:`The most intense phase of the election. Candidates and parties conduct: public rallies (requiring prior permission), door-to-door campaigns, print/TV/digital advertising (pre-certified), nukkad nataks (street plays), and social media campaigns. The ECI deploys Expenditure Observers to monitor spending. Flying Squads intercept cash distribution. cVIGIL app allows citizens to report violations. Expenditure limits: ₹95 lakh per Lok Sabha candidate.`
+  },
+  {
+    day:'Day 75',phase:'voting',done:false,
+    title:'Campaign Silence Period (48 Hours)',
+    tags:['SILENCE','MANDATORY'],
+    highlight:false,
+    detail:`A mandatory 48-hour silence period begins exactly 48 hours before polling starts. During this time: no campaign meetings, rallies, or processions are allowed; no political advertisements can be published; exit polls cannot be broadcast or published; and social media political campaigns must cease. This aims to give voters a quiet period for independent reflection before casting their vote. Violations can lead to FIR registration and candidate disqualification.`
+  },
+  {
+    day:'Day 77',phase:'voting',done:false,
+    title:'ELECTION DAY — Polls Open',
+    tags:['POLLING','CRITICAL'],
+    highlight:true,
+    detail:`The moment democracy happens. Polling stations (booths) open at 7:00 AM and close at 6:00 PM (extended if voters are still in queue). Each booth serves ~1,000-1,500 voters. The process: voter arrives → identity verified against electoral roll → indelible ink applied to left index finger → enters polling compartment → presses candidate button on EVM → VVPAT shows slip for 7 seconds → vote recorded. Central Armed Police Forces (CAPF) are deployed at sensitive booths. Web-casting is active at many booths for transparency.`
+  },
+  {
+    day:'Day 77',phase:'voting',done:false,
+    title:'EVM Sealing & Secure Transport',
+    tags:['SECURITY','CUSTODY'],
+    highlight:false,
+    detail:`At 6:00 PM sharp, polling ends. The Presiding Officer seals the EVM in the presence of candidate representatives (polling agents). Sealed EVMs are transported in secured vehicles under CAPF escort to designated strong rooms in district headquarters. Strong rooms are sealed with multiple locks — candidates receive copies of the keys. Video surveillance runs 24/7. The chain of custody is documented at every step.`
+  },
+  {
+    day:'Day 80',phase:'post',done:false,
+    title:'Vote Counting Day',
+    tags:['COUNTING','RESULTS'],
+    highlight:false,
+    detail:`All EVMs are brought to the counting hall under tight security. Counting proceeds round by round: first, postal ballots (from armed forces, government officials on duty, disabled voters) are counted. Then EVM counting begins with multiple tables running simultaneously. After each round, the count is announced publicly. VVPAT slips from 5 randomly selected booths per constituency are physically counted and matched against EVM totals. Results declared constituency by constituency throughout the day.`
+  },
+  {
+    day:'Day 80',phase:'post',done:false,
+    title:'Results Declaration & Winners Notified',
+    tags:['RESULTS','WINNERS'],
+    highlight:false,
+    detail:`Once all rounds are complete in a constituency, the Returning Officer declares the winner — the candidate with the most votes (First Past the Post system). No minimum percentage is required. Winners receive a formal certificate of election. The Election Commission provides real-time results on its portal. News channels project winners. By evening, a clear national picture emerges of which party or coalition will form the government.`
+  },
+  {
+    day:'Day 90',phase:'post',done:false,
+    title:'New Government Sworn In',
+    tags:['GOVERNMENT','CONSTITUTION'],
+    highlight:false,
+    detail:`The President of India invites the leader of the party or coalition with majority support (272+ seats out of 543) to form the government. The Prime Minister-designate is sworn in by the President at Rashtrapati Bhavan. The PM then recommends Cabinet ministers, who are also sworn in. Within 30 days, the new government must prove its majority on the floor of the Lok Sabha through a confidence vote. The new Parliament then meets for its first session.`
+  },
+];
+
+let currentPhase = 'all';
+let expandedIdx = null;
+
+function renderTimeline(phase){
+  const filtered = EVENTS.filter(e => phase==='all' || e.phase===phase);
+  document.getElementById('tlTrack').innerHTML = filtered.map((e,i)=>`
+    <div class="tl-item" data-phase="${e.phase}">
+      <div class="tl-date-col">
+        <div class="tl-day">${e.day}</div>
+        <div class="tl-phase-tag">${e.phase.toUpperCase()}</div>
+      </div>
+      <div class="tl-dot-col">
+        <div class="tl-dot ${e.done?'done':''} ${e.highlight?'highlight':''}" onclick="toggleCard(${i})"></div>
+      </div>
+      <div class="tl-content">
+        <div class="tl-card ${e.highlight?'highlight-card':''} ${e.done?'done-card':''}" onclick="toggleCard(${i})" id="card${i}">
+          <div class="tc-header">
+            <div class="tc-title ${e.highlight?'highlight':''} ${e.done?'done':''}">${e.title}</div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div class="tc-badges">${e.tags.map(t=>`<span class="tag ${e.highlight?'tag-gold':''}">${t}</span>`).join('')}</div>
+              <div class="tc-arrow">▶</div>
+            </div>
+          </div>
+          <div class="tc-body" id="body${i}">${e.detail}</div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleCard(i){
+  const card = document.getElementById('card'+i);
+  card.classList.toggle('expanded');
+}
+
+function filterPhase(phase, btn){
+  currentPhase = phase;
+  document.querySelectorAll('.phase-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  renderTimeline(phase);
+}
+
+renderTimeline('all');
+</script>
+</body>
+</html>
