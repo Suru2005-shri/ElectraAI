@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Voter Guide — ELECTRA·AI</title>
+<link rel="stylesheet" href="css/global.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700;900&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
+<style>
+.page{padding-top:80px;min-height:100vh;position:relative;z-index:2;}
+.guide-wrap{padding:40px 60px;max-width:1100px;}
+.guide-section{margin-bottom:60px;}
+.gs-title{
+  font-family:var(--font-head);font-size:22px;font-weight:900;
+  margin-bottom:6px;display:flex;align-items:center;gap:14px;
+}
+.gs-icon{font-size:28px;}
+.gs-sub{font-size:13px;color:var(--muted);margin-bottom:24px;}
+
+/* STEP FLOW */
+.step-flow{display:flex;flex-direction:column;gap:14px;}
+.step-card{
+  display:flex;gap:20px;align-items:flex-start;
+  padding:18px 22px;border-radius:14px;
+  border:1px solid var(--border);background:var(--surface);
+  transition:all 0.25s;
+}
+.step-card:hover{
+  border-color:rgba(0,245,255,0.35);background:var(--surface2);
+  transform:translateX(6px);box-shadow:0 6px 30px rgba(0,245,255,0.1);
+}
+.step-num{
+  font-family:var(--font-head);font-size:20px;font-weight:900;
+  color:var(--neon);text-shadow:0 0 16px var(--neon);
+  min-width:32px;
+}
+.step-body{}
+.step-title{font-family:var(--font-head);font-size:13px;color:var(--neon);margin-bottom:6px;letter-spacing:0.5px;}
+.step-text{font-size:13px;color:var(--muted);line-height:1.65;}
+.step-text strong{color:var(--text);}
+
+/* ID TABLE */
+.id-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;}
+.id-card{
+  padding:14px 16px;border-radius:10px;
+  border:1px solid var(--border);background:var(--surface);
+  display:flex;gap:10px;align-items:flex-start;
+}
+.id-icon{font-size:20px;flex-shrink:0;}
+.id-name{font-size:12px;font-weight:600;color:var(--text);}
+.id-note{font-size:11px;color:var(--muted);margin-top:3px;}
+
+/* INFO CARDS */
+.info-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
+.info-card{
+  padding:22px;border-radius:14px;
+  border:1px solid var(--border);background:var(--surface);
+  transition:all 0.25s;
+}
+.info-card:hover{border-color:rgba(0,245,255,0.35);background:var(--surface2);}
+.ic-icon{font-size:28px;margin-bottom:12px;}
+.ic-title{font-family:var(--font-head);font-size:11px;color:var(--neon);margin-bottom:8px;letter-spacing:0.5px;}
+.ic-text{font-size:13px;color:var(--muted);line-height:1.65;}
+.ic-text strong{color:var(--text);}
+
+/* DO / DON'T */
+.dd-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.dd-card{padding:20px;border-radius:12px;}
+.dd-do{background:rgba(0,255,136,0.06);border:1px solid rgba(0,255,136,0.2);}
+.dd-dont{background:rgba(255,80,80,0.06);border:1px solid rgba(255,80,80,0.2);}
+.dd-title{font-family:var(--font-head);font-size:12px;margin-bottom:14px;}
+.dd-do .dd-title{color:var(--green);}
+.dd-dont .dd-title{color:#ff6060;}
+.dd-item{display:flex;gap:8px;font-size:12px;color:var(--muted);margin-bottom:8px;line-height:1.5;}
+
+@media(max-width:768px){
+  .guide-wrap{padding:24px 16px;}
+  .dd-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<canvas id="bgCanvas"></canvas>
+
+<nav class="nav">
+  <a href="index.html" class="nav-logo">ELECTRA<span>·AI</span></a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="assistant.html">AI Assistant</a>
+    <a href="timeline.html">Timeline</a>
+    <a href="guide.html" class="active">Voter Guide</a>
+    <a href="quiz.html">Quiz</a>
+    <a href="dashboard.html">Dashboard</a>
+  </div>
+  <div class="nav-status"><span class="dot"></span>ML ONLINE</div>
+</nav>
+
+<div class="page">
+<div class="page-header" style="padding:40px 60px 30px;">
+  <div class="page-breadcrumb">ELECTRA·AI → VOTER GUIDE</div>
+  <div class="page-title">Complete <span class="glow-text">Voter Guide</span></div>
+  <div class="page-sub">Everything a first-time or experienced voter needs to know — from registration to casting your vote.</div>
+</div>
+
+<div class="guide-wrap">
+
+  <!-- REGISTRATION -->
+  <div class="guide-section">
+    <div class="gs-title"><span class="gs-icon">🪪</span>Step 1 — Voter Registration</div>
+    <div class="gs-sub">You must be on the electoral roll to vote. Here's how to register:</div>
+    <div class="step-flow">
+      <div class="step-card"><div class="step-num">01</div><div class="step-body"><div class="step-title">CHECK IF YOU'RE ALREADY REGISTERED</div><div class="step-text">Visit <strong>voters.eci.gov.in</strong> and search by name, EPIC number, or mobile number. Many citizens are already enrolled. If found, note your Part Number and Serial Number — you'll need these on election day.</div></div></div>
+      <div class="step-card"><div class="step-num">02</div><div class="step-body"><div class="step-title">FILL FORM 6 (NEW REGISTRATION)</div><div class="step-text">Download Form 6 from voters.eci.gov.in or pick it up from your local ERO/AERO office. Fill in personal details including your <strong>permanent address</strong> in the constituency where you want to vote.</div></div></div>
+      <div class="step-card"><div class="step-num">03</div><div class="step-body"><div class="step-title">GATHER DOCUMENTS</div><div class="step-text">You need: <strong>Proof of Age</strong> (10th marksheet, birth certificate, or passport), <strong>Proof of Address</strong> (Aadhaar, utility bill, or bank passbook), and a recent <strong>passport-size photograph</strong>.</div></div></div>
+      <div class="step-card"><div class="step-num">04</div><div class="step-body"><div class="step-title">SUBMIT — ONLINE OR OFFLINE</div><div class="step-text"><strong>Online:</strong> Submit at voters.eci.gov.in with scanned documents.<br><strong>Offline:</strong> Submit at your district ERO office or to your Booth Level Officer (BLO). Ask for an acknowledgment receipt.</div></div></div>
+      <div class="step-card"><div class="step-num">05</div><div class="step-body"><div class="step-title">RECEIVE YOUR EPIC CARD</div><div class="step-text">After verification (4–8 weeks), your <strong>EPIC card</strong> (Electors Photo Identity Card) is delivered to your address. Keep it safe — this is your primary voter ID. You can also download a digital copy from the DigiLocker app.</div></div></div>
+    </div>
+  </div>
+
+  <!-- VALID IDs -->
+  <div class="guide-section">
+    <div class="gs-title"><span class="gs-icon">📋</span>Accepted ID Documents on Election Day</div>
+    <div class="gs-sub">EPIC card is primary, but 12 alternatives are accepted:</div>
+    <div class="id-grid">
+      <div class="id-card"><div class="id-icon">🪪</div><div><div class="id-name">EPIC Card (Voter ID)</div><div class="id-note">Primary ID — always accepted</div></div></div>
+      <div class="id-card"><div class="id-icon">🆔</div><div><div class="id-name">Aadhaar Card</div><div class="id-note">UIDAI-issued biometric ID</div></div></div>
+      <div class="id-card"><div class="id-icon">📗</div><div><div class="id-name">Passport</div><div class="id-note">Indian passport</div></div></div>
+      <div class="id-card"><div class="id-icon">🚗</div><div><div class="id-name">Driving Licence</div><div class="id-note">Valid DL with photo</div></div></div>
+      <div class="id-card"><div class="id-icon">🏛️</div><div><div class="id-name">PAN Card</div><div class="id-note">Income tax ID with photo</div></div></div>
+      <div class="id-card"><div class="id-icon">💼</div><div><div class="id-name">Govt. Service ID</div><div class="id-note">Central/state govt employee ID</div></div></div>
+      <div class="id-card"><div class="id-icon">📘</div><div><div class="id-name">Passbook with Photo</div><div class="id-note">Nationalized bank/PO</div></div></div>
+      <div class="id-card"><div class="id-icon">🎓</div><div><div class="id-name">MNREGA Job Card</div><div class="id-note">With photo</div></div></div>
+      <div class="id-card"><div class="id-icon">🏥</div><div><div class="id-name">Smart Health Card</div><div class="id-note">Under ESIC / CGHS</div></div></div>
+      <div class="id-card"><div class="id-icon">📜</div><div><div class="id-name">Pension Documents</div><div class="id-note">With photo</div></div></div>
+      <div class="id-card"><div class="id-icon">🏠</div><div><div class="id-name">NPR Smart Card</div><div class="id-note">National Population Register</div></div></div>
+      <div class="id-card"><div class="id-icon">🎖️</div><div><div class="id-name">Service ID (Armed Forces)</div><div class="id-note">Military ID</div></div></div>
+    </div>
+  </div>
+
+  <!-- VOTING DAY -->
+  <div class="guide-section">
+    <div class="gs-title"><span class="gs-icon">🗳️</span>Step 2 — Voting Day Process</div>
+    <div class="gs-sub">What happens at the polling booth from start to finish:</div>
+    <div class="step-flow">
+      <div class="step-card"><div class="step-num">01</div><div class="step-body"><div class="step-title">FIND YOUR POLLING BOOTH</div><div class="step-text">Check voters.eci.gov.in or call <strong>1950</strong>. A voter slip with your booth address may be delivered to your home. Booths are usually schools, community centers, or government buildings within 2 km of your home.</div></div></div>
+      <div class="step-card"><div class="step-num">02</div><div class="step-body"><div class="step-title">ARRIVE WITH YOUR ID</div><div class="step-text">Polling is open <strong>7:00 AM – 6:00 PM</strong>. Bring your EPIC card or alternate photo ID. You don't need the voter slip — just your name on the electoral roll is enough. Join the correct gender queue (separate queues for men and women).</div></div></div>
+      <div class="step-card"><div class="step-num">03</div><div class="step-body"><div class="step-title">IDENTITY VERIFICATION</div><div class="step-text">Polling officers verify your identity and find your name in the electoral roll. Your details are marked to prevent double voting. If your name is missing from the roll, you <strong>cannot vote</strong> — contact the BLO immediately.</div></div></div>
+      <div class="step-card"><div class="step-num">04</div><div class="step-body"><div class="step-title">INDELIBLE INK & SLIP</div><div class="step-text">Indelible ink is applied to your <strong>left index finger</strong>. This cannot be washed off for 2–3 weeks, preventing double voting. You receive a numbered slip to carry into the polling compartment.</div></div></div>
+      <div class="step-card"><div class="step-num">05</div><div class="step-body"><div class="step-title">CAST YOUR VOTE ON THE EVM</div><div class="step-text">Enter the polling compartment alone (secrecy guaranteed). The EVM's <strong>Ballot Unit</strong> shows candidate names and party symbols. Press the blue button next to your chosen candidate. A beep confirms your vote.</div></div></div>
+      <div class="step-card"><div class="step-num">06</div><div class="step-body"><div class="step-title">VERIFY YOUR VVPAT SLIP</div><div class="step-text">The VVPAT machine prints a paper slip showing your candidate's name and symbol, visible for <strong>7 seconds</strong> through a glass window. Verify this matches your choice. The slip then drops into a sealed box. Your vote is complete!</div></div></div>
+    </div>
+  </div>
+
+  <!-- DO & DONT -->
+  <div class="guide-section">
+    <div class="gs-title"><span class="gs-icon">⚖️</span>Dos and Don'ts on Election Day</div>
+    <div class="gs-sub">Know your rights and responsibilities as a voter:</div>
+    <div class="dd-grid">
+      <div class="dd-card dd-do">
+        <div class="dd-title">✅ DO</div>
+        <div class="dd-item"><span>✓</span><span>Carry a valid photo ID document</span></div>
+        <div class="dd-item"><span>✓</span><span>Check your name on the electoral roll before election day</span></div>
+        <div class="dd-item"><span>✓</span><span>Vote independently without pressure from anyone</span></div>
+        <div class="dd-item"><span>✓</span><span>Maintain silence and order inside/near the booth</span></div>
+        <div class="dd-item"><span>✓</span><span>Report irregularities on the cVIGIL app (call 1950)</span></div>
+        <div class="dd-item"><span>✓</span><span>Verify your VVPAT slip matches your chosen candidate</span></div>
+        <div class="dd-item"><span>✓</span><span>Help elderly or disabled voters if they need assistance</span></div>
+      </div>
+      <div class="dd-card dd-dont">
+        <div class="dd-title">❌ DON'T</div>
+        <div class="dd-item"><span>✗</span><span>Take photos inside the polling booth (illegal)</span></div>
+        <div class="dd-item"><span>✗</span><span>Accept money, gifts, or liquor in exchange for your vote</span></div>
+        <div class="dd-item"><span>✗</span><span>Use your mobile phone inside the polling compartment</span></div>
+        <div class="dd-item"><span>✗</span><span>Vote more than once or on someone else's behalf</span></div>
+        <div class="dd-item"><span>✗</span><span>Engage in campaigning within 200 meters of a booth</span></div>
+        <div class="dd-item"><span>✗</span><span>Carry weapons or inflammatory material to the booth</span></div>
+        <div class="dd-item"><span>✗</span><span>Impersonate another voter (criminal offense)</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- USEFUL RESOURCES -->
+  <div class="guide-section">
+    <div class="gs-title"><span class="gs-icon">📞</span>Useful Resources & Contacts</div>
+    <div class="info-grid">
+      <div class="info-card"><div class="ic-icon">☎️</div><div class="ic-title">VOTER HELPLINE</div><div class="ic-text"><strong>Call 1950</strong> for any election-related query, complaint or voter list issues. Available in multiple languages.</div></div>
+      <div class="info-card"><div class="ic-icon">🌐</div><div class="ic-title">OFFICIAL ECI WEBSITE</div><div class="ic-text"><strong>eci.gov.in</strong> for official notifications and <strong>voters.eci.gov.in</strong> for voter registration and search.</div></div>
+      <div class="info-card"><div class="ic-icon">📱</div><div class="ic-title">cVIGIL APP</div><div class="ic-text">Report MCC violations with photo/video directly to ECI. <strong>Action taken within 100 minutes</strong>. Available on Play Store and App Store.</div></div>
+      <div class="info-card"><div class="ic-icon">🔍</div><div class="ic-title">MYNETA.INFO</div><div class="ic-text">Check candidate affidavits, criminal records, assets, education, and past election performance. Powered by ADR.</div></div>
+      <div class="info-card"><div class="ic-icon">📊</div><div class="ic-title">ELECTION RESULTS</div><div class="ic-text">Real-time results at <strong>results.eci.gov.in</strong> on counting day. Constituency-wise live count updates.</div></div>
+      <div class="info-card"><div class="ic-icon">💳</div><div class="ic-title">DIGITAL VOTER ID</div><div class="ic-text">Download your digital EPIC card from DigiLocker app using your registered mobile number. Works offline as valid ID.</div></div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<footer class="footer">
+  <div class="footer-logo">ELECTRA<span>·AI</span></div>
+  <div class="footer-links">
+    <a href="assistant.html">AI Assistant</a>
+    <a href="timeline.html">Timeline</a>
+    <a href="guide.html">Guide</a>
+    <a href="quiz.html">Quiz</a>
+    <a href="dashboard.html">Dashboard</a>
+  </div>
+  <div class="footer-note">Data from ECI, Government of India. For official info always verify at eci.gov.in</div>
+</footer>
+
+<script src="js/bg3d.js"></script>
+</body>
+</html>
